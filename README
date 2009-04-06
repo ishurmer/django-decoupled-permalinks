@@ -13,9 +13,9 @@
     Usage:
             {{ my_model|permalink }}
             
-    By default, the filter will lookup the [class]_permalink, e.g.
-    my_model_permalink in your current site URLs to determine what url to use as
-    the permalink. Think can be overridden using the 'url' parameter, or the
+    By default, the filter will lookup a url named [class]_permalink, (e.g.
+    my_model_permalink) in your current site URLs to determine what url to use as
+    the permalink. This can be overridden using the 'url' parameter, or the
     additional decorator function.
     
     The decorator function can also be used to maintain compatibility with the
