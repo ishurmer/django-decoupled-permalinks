@@ -140,7 +140,7 @@
             url(
                 r'^read-article/(?P<pub_year>\d+)/(?P<pub_month>\d+)/'
                 +'(?P<pub_day>\d+)/(?P<id>\d+)/(?P<slug>[-\w]+).html',
-                view=read_article, name='article_permalink'
+                view=read_article, name='read_article_by_date_id'
             )       
            
         Results in (example):
