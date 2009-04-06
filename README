@@ -60,8 +60,8 @@
     e.g.
 
         @auto_permalink
-                def get_absolute_url(self):
-                    pass         
+        def get_absolute_url(self):
+            pass         
                     
     Usage Examples
     ----- --------               
