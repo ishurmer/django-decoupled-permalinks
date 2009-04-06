@@ -1,0 +1,150 @@
+    Django Decoupled Permalink Filter
+        
+    Django template engine filter. Provides a permalink filter to ensure
+    presentation layer is decoupled from model, along with a decorator function
+    for compatibility with get_absolute_url function.
+    
+        v0.2 - 06/04/2009
+            IS: Initial Release
+    
+    Permalink Filter
+    --------- ------
+    
+    Usage:
+            {{ my_model|permalink }}
+            
+    By default, the filter will lookup the [class]_permalink, e.g.
+    my_model_permalink in your current site URLs to determine what url to use as
+    the permalink. Think can be overridden using the 'url' parameter, or the
+    additional decorator function.
+    
+    The decorator function can also be used to maintain compatibility with the
+    get_absolute_url function, as used by the admin system and various other
+    Django pluggables.
+    
+    The filter will attempt to extract any parameters from the url, and replace
+    them with the equivalent field. For example, in your relevant urls.py file:
+    
+        url(
+            r'^read-article/(?P<id>\d+)_(?P<slug>[-\w]+).html',
+            view=read_article, name='article_permalink'
+        )
+        
+    When {{my_article|permalink}} is called in a template, the filter will try
+    and resolve the 'article_permalink' URL, substituting in the id and slug 
+    fields where the parameters are given:
+    
+        The Article model has additional slug unique field (along with default
+        Django auto id field).
+        
+        Article instance has: id = 1, slug = 'example-article'
+        
+    The filter would take the article_permalink URL, and attempt to substitute
+    any parameters specified within the url with their equivalent field value,
+    giving in this case:
+        
+        read-article/1_example-article.html
+
+    If the article_permalink (or specified) url is not defined, or any 
+    parameters cannot be resolved, a TemplateError will be raised.
+    
+    Decorator Function
+    --------- --------
+    
+    Decorator function to maintain compatibility with that horrendous
+    get_absolute_url function, used in conjunction with the permalink filter.
+    
+    f is a function returning an optional url name if you wish to override
+    the default [class]_permalink.
+
+    e.g.
+
+        @auto_permalink
+                def get_absolute_url(self):
+                    pass         
+                    
+    Usage Examples
+    ----- --------               
+
+    1.  Basic permalink filter, default URL name, with no get_absolute_url
+        compatibility:
+    
+        In articles/urls.py file (excerpt):
+            
+            url(
+                r'^read-article/(?P<id>\d+)_(?P<slug>[-\w]+).html',
+                view=read_article, name='article_permalink'
+            )
+        
+        In articles/templates/list_articles.html (excerpt):
+        
+            <a href='{{ article|permalink }}'>Read Complete Article</a>
+        
+        Results in (example):
+            
+            <a href='read-article/1_test-article.html'>Read Complete Article</a>
+        
+    2.  Permalink filter, default URL name, with get_absolute_url compatibility
+        (RECOMMENDED):
+    
+        In articles/models.py file (excerpt):
+        
+            class Article(models.Model):
+                slug = Models.SlugField(unique=True)
+                
+                @auto_permalink
+                def get_absolute_url(self):
+                    pass
+                   
+        In articles/urls.py file (excerpt):
+            
+            url(
+                r'^read-article/(?P<id>\d+)_(?P<slug>[-\w]+).html',
+                view=read_article, name='article_permalink'
+            )       
+            
+        In articles/templates/list_articles.html (excerpt):
+        
+            <a href='{{ article|permalink }}'>Read Complete Article</a>
+            
+        Results in (example):
+            
+            <a href='read-article/1_test-article.html'>Read Complete Article</a>
+            
+    3.  Permalink filter, overridden url name, with get_absolute_url and custom
+        properties:
+    
+        In articles/models.py file (excerpt):
+        
+            class Article(models.Model):
+                slug = Models.SlugField(unique=True)
+                
+                @auto_permalink
+                def get_absolute_url(self):
+                    return 'read_article_by_date_id'
+                                
+                @property       
+                def pub_year(self):
+                    return int(self.published.year)
+
+                @property                           
+                def pub_month(self):
+                    return int(self.published.month)
+
+                @property                           
+                def pub_day(self):
+                    return int(self.published.day)
+                   
+        In articles/urls.py file (excerpt):
+            
+            url(
+                r'^read-article/(?P<pub_year>\d+)/(?P<pub_month>\d+)/'
+                +'(?P<pub_day>\d+)/(?P<id>\d+)/(?P<slug>[-\w]+).html',
+                view=read_article, name='article_permalink'
+            )       
+           
+        Results in (example):
+            
+            <a href='read-article/2009/04/06/1/test-article.html'>
+                Read Complete Article
+            </a>                        
